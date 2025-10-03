@@ -213,7 +213,7 @@ const ErrorHandlingExample = () => {
               Warning
             </button>
             <button
-              onClick={() => showError('This is an error', { label: 'Retry', onClick: () => console.log('Retry clicked') })}
+              onClick={() => showError('This is an error', { label: 'Retry', onClick: () => showSuccess('Retry successful!') })}
               className="text-xs bg-red-100 text-red-700 px-3 py-2 rounded hover:bg-red-200 transition-colors"
             >
               Error
