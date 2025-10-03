@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { logError } from './errorHandling.js';
 
 const ErrorContext = createContext();
 
@@ -69,8 +68,8 @@ export const ErrorProvider = ({ children }) => {
 
   // Network error handling with actionable messages
   const handleNetworkError = useCallback((error, context = '') => {
-    logError(error, `Network error${context ? ` in ${context}` : ''}`);
-
+    console.error(`Network error${context ? ` in ${context}` : ''}:`, error);
+    
     let message = 'Something went wrong. Please try again.';
     let action = null;
 
@@ -107,8 +106,8 @@ export const ErrorProvider = ({ children }) => {
 
   // API error handling with specific context
   const handleApiError = useCallback((error, operation = '') => {
-    logError(error, `API error${operation ? ` during ${operation}` : ''}`);
-
+    console.error(`API error${operation ? ` during ${operation}` : ''}:`, error);
+    
     let message = `Failed to ${operation || 'complete operation'}. Please try again.`;
     let action = null;
 
@@ -125,8 +124,8 @@ export const ErrorProvider = ({ children }) => {
 
   // Firebase error handling
   const handleFirebaseError = useCallback((error, operation = '') => {
-    logError(error, `Firebase error${operation ? ` during ${operation}` : ''}`);
-
+    console.error(`Firebase error${operation ? ` during ${operation}` : ''}:`, error);
+    
     let message = `Failed to ${operation || 'complete operation'}. Please try again.`;
     let action = null;
 
