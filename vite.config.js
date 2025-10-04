@@ -12,5 +12,4 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true
   },
-  envPrefix: 'REACT_APP_'
 })
