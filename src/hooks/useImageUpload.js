@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useBlobUrlManager } from '../utils/blobManager.js';
-import { useError } from '../utils/errorContext.js';
+import { useError } from '../utils/errorContext.jsx';
 
 /**
  * Hook for managing image uploads with preview and automatic cleanup

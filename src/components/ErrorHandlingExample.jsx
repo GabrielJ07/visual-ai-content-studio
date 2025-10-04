@@ -1,5 +1,5 @@
 import React from 'react';
-import { useError } from '../utils/errorContext.js';
+import { useError } from '../utils/errorContext.jsx';
 import { AlertTriangleIcon } from './Icons.jsx';
 import { 
   useImageGenerationSimulator, 

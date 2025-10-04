@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { AlertTriangleIcon, AlertCircleIcon, InfoIcon, CheckCircleIcon, XIcon } from './Icons.jsx';
 
 const Toast = ({ id, type = 'info', message, action, onClose, duration = 5000 }) => {

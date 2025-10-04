@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
-import { ErrorProvider } from './utils/errorContext.js';
+import { ErrorProvider } from './utils/errorContext.jsx';
 import Toast from './components/Toast.jsx';
 import ErrorHandlingExample from './components/ErrorHandlingExample.jsx';
 import { validateConfiguration, getConfigSummary } from './utils/config.js';
