@@ -60,21 +60,30 @@ const getEnvVar = (key, fallback = null, required = false) => {
 };
 
 /**
- * Firebase Configuration
+ * Firebase Configuration (Optional - for legacy compatibility only)
+ * Firebase is no longer required as all data is stored locally
  */
 export const getFirebaseConfig = () => {
   try {
+    // Check if Firebase config is provided (optional)
+    const apiKey = getEnvVar('REACT_APP_FIREBASE_API_KEY', null, false);
+    
+    if (!apiKey) {
+      // Return null if Firebase is not configured - this is fine
+      return null;
+    }
+
     return {
-      apiKey: getEnvVar('REACT_APP_FIREBASE_API_KEY', null, true),
-      authDomain: getEnvVar('REACT_APP_FIREBASE_AUTH_DOMAIN', null, true),
-      projectId: getEnvVar('REACT_APP_FIREBASE_PROJECT_ID', null, true),
-      storageBucket: getEnvVar('REACT_APP_FIREBASE_STORAGE_BUCKET', null, true),
-      messagingSenderId: getEnvVar('REACT_APP_FIREBASE_MESSAGING_SENDER_ID', null, true),
-      appId: getEnvVar('REACT_APP_FIREBASE_APP_ID', null, true)
+      apiKey: apiKey,
+      authDomain: getEnvVar('REACT_APP_FIREBASE_AUTH_DOMAIN', null, false),
+      projectId: getEnvVar('REACT_APP_FIREBASE_PROJECT_ID', null, false),
+      storageBucket: getEnvVar('REACT_APP_FIREBASE_STORAGE_BUCKET', null, false),
+      messagingSenderId: getEnvVar('REACT_APP_FIREBASE_MESSAGING_SENDER_ID', null, false),
+      appId: getEnvVar('REACT_APP_FIREBASE_APP_ID', null, false)
     };
   } catch (error) {
-    console.error('Firebase configuration error:', error.message);
-    throw new Error('Firebase is not properly configured. Please check your environment variables.');
+    console.warn('Firebase configuration warning:', error.message);
+    return null; // Firebase is optional now
   }
 };
 
@@ -114,18 +123,21 @@ export const getErrorReportingConfig = () => {
 };
 
 /**
- * Validate all required configuration
- * Call this at app startup to fail fast if configuration is missing
+ * Validate required configuration
+ * Call this at app startup to fail fast if essential configuration is missing
  */
 export const validateConfiguration = () => {
   const errors = [];
   
-  try {
-    getFirebaseConfig();
-  } catch (error) {
-    errors.push(`Firebase: ${error.message}`);
+  // Firebase is now optional - only validate if configured
+  const firebaseConfig = getFirebaseConfig();
+  if (firebaseConfig) {
+    console.log('✅ Firebase configuration detected (legacy mode)');
+  } else {
+    console.log('ℹ️ Firebase not configured - using local storage only');
   }
   
+  // Gemini AI is still required for content generation
   try {
     getGeminiConfig();
   } catch (error) {
@@ -138,7 +150,7 @@ export const validateConfiguration = () => {
     throw new Error(errorMessage);
   }
   
-  console.log('✅ All configuration validated successfully');
+  console.log('✅ Essential configuration validated successfully');
 };
 
 /**
@@ -150,11 +162,11 @@ export const getConfigSummary = () => {
   const app = getAppConfig();
   
   return {
-    firebase: {
+    firebase: firebase ? {
       projectId: firebase.projectId,
       authDomain: firebase.authDomain,
       hasApiKey: !!firebase.apiKey
-    },
+    } : null,
     gemini: {
       hasApiKey: !!gemini.apiKey,
       textModel: gemini.textModel,
@@ -164,6 +176,11 @@ export const getConfigSummary = () => {
       appId: app.appId,
       environment: app.environment,
       hasInitialAuthToken: !!app.initialAuthToken
+    },
+    storage: {
+      mode: 'local',
+      localStorage: typeof localStorage !== 'undefined',
+      indexedDB: 'indexedDB' in window
     }
   };
 };

@@ -65,25 +65,25 @@ export const useImageGenerationSimulator = () => {
 };
 
 /**
- * Custom hook for Firebase operation simulation with proper error handling
- * Demonstrates Firebase-specific error patterns
+ * Custom hook for local storage operation simulation with proper error handling
+ * Demonstrates storage-specific error patterns (replaces Firebase simulator)
  */
-export const useFirebaseSimulator = () => {
+export const useStorageSimulator = () => {
   const { showError, showSuccess } = useError();
   const [loading, setLoading] = useState(false);
 
-  const simulateFirebaseOperation = async () => {
+  const simulateStorageOperation = async () => {
     try {
       setLoading(true);
       
-      // Simulate Firebase call delay
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Simulate storage operation delay
+      await new Promise(resolve => setTimeout(resolve, 300));
       
-      // Simulate Firebase errors
+      // Simulate storage errors
       const errors = [
-        { code: 'permission-denied' },
-        { code: 'unavailable' },
-        { code: 'unauthenticated' },
+        { name: 'QuotaExceededError' },
+        { name: 'InvalidStateError' },
+        { name: 'DataError' },
         null // success
       ];
       
@@ -93,9 +93,9 @@ export const useFirebaseSimulator = () => {
         throw error;
       }
       
-      showSuccess('Data saved successfully!');
+      showSuccess('Data saved locally!');
     } catch (error) {
-      errorHandlers.firebase.firestore(error, showError, 'save settings');
+      errorHandlers.storage.localStorage(error, showError, 'save settings');
     } finally {
       setLoading(false);
     }
@@ -103,9 +103,12 @@ export const useFirebaseSimulator = () => {
 
   return {
     loading,
-    simulateFirebaseOperation
+    simulateStorageOperation
   };
 };
+
+// Legacy export for compatibility
+export const useFirebaseSimulator = useStorageSimulator;
 
 /**
  * Custom hook for network request simulation with proper error handling

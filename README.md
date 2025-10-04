@@ -34,17 +34,18 @@ An AI-powered visual content creation platform for social media with brand kit m
 - **Multi-platform Commit**: Batch schedule across multiple formats
 - **Status Tracking**: Monitor pending, scheduled, and committed posts
 
-### 💾 Firebase Integration
-- **Firestore Persistence**: Auto-save settings and content
-- **Authentication**: Anonymous and custom token auth support
-- **Recent Images**: Track generation history with metadata
+### 💾 Local Storage System
+- **Browser Storage**: All data stored locally for privacy
+- **Auto-save Settings**: Persistent user preferences and brand kit
+- **Image History**: Track generation history with IndexedDB
+- **No Cloud Sync**: Complete privacy - data never leaves your device
 
 ## Tech Stack
 
 - **Frontend**: React 18+ with Hooks
 - **Styling**: Tailwind CSS (inline utility classes)
 - **AI Models**: Google Gemini 2.5 Flash (Text & Image)
-- **Backend**: Firebase (Firestore + Auth)
+- **Storage**: Browser localStorage + IndexedDB (privacy-first)
 - **Icons**: Lucide-style SVG components
 
 ## Requirements
@@ -52,16 +53,15 @@ An AI-powered visual content creation platform for social media with brand kit m
 ### Dependencies
 ```json
 {
-  "react": "^18.0.0",
-  "firebase": "^10.0.0"
+  "react": "^18.0.0"
 }
 ```
 
 ### Environment Variables
 The app expects these to be injected at runtime:
-- `firebaseconfig`: Firebase configuration JSON string
-- `initialauthtoken`: (Optional) Custom auth token
-- `appid`: Application identifier for Firestore paths
+- `firebaseconfig`: (Optional) Legacy Firebase configuration - no longer required
+- `initialauthtoken`: (Optional) Not used in local storage mode
+- `appid`: (Optional) Application identifier for compatibility
 
 ### API Keys
 - **Gemini API Key**: Required for AI features (provided by Canvas runtime)
@@ -73,10 +73,11 @@ The app expects these to be injected at runtime:
 npm install react firebase
 ```
 
-### 2. Configure Firebase
-Create a Firebase project and enable:
-- Firestore Database
-- Authentication (Anonymous & Custom Token)
+### 2. Configure Storage (Optional)
+All data is stored locally by default. No external configuration required.
+- Settings: Browser localStorage
+- Images: Browser IndexedDB
+- Privacy: Data never leaves your device
 
 ### 3. Set Environment Variables
 
@@ -88,19 +89,14 @@ cp .env.example .env
 
 Edit `.env` with your actual API keys and configuration values. See `.env.example` for all available options.
 
-**Option B: Runtime Injection (Alternative)**
-You can also inject configuration at runtime:
+**Option B: Runtime Injection (Legacy Compatibility)**
+For legacy compatibility, you can inject configuration at runtime, but it's no longer required:
 ```javascript
-window.firebaseconfig = JSON.stringify({
-  apiKey: "YOUR_API_KEY",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "your-app-id"
-});
-
+// Optional - only needed for backward compatibility
 window.appid = "visual-ai-studio";
+
+// Firebase config no longer required
+// All data is stored locally in the browser
 ```
 
 ### 4. Run Development Server
@@ -134,7 +130,9 @@ src/
 ├── utils/
 │   ├── errorContext.js    # Error context and hooks (✅ COMPLETED)
 │   ├── errorHandling.js   # Error handling utilities (✅ COMPLETED)
-│   ├── firebase.js        # Firebase initialization
+│   ├── localStorage.js    # Browser localStorage operations
+│   ├── indexedDB.js       # Browser IndexedDB operations
+│   ├── dataStorage.js     # Unified storage abstraction layer
 │   └── gemini.js          # Gemini API helpers
 └── constants/
     └── platforms.js       # Social platform configurations
@@ -169,30 +167,32 @@ src/
 - **Text Generation**: `v1beta/models/gemini-2.5-flash-preview-05-20:generateContent`
 - **Image Generation**: `v1beta/models/gemini-2.5-flash-image-preview:generateContent`
 
-### Firestore Schema
+### Local Storage Schema
 ```
-artifacts/
-  {appId}/
-    users/
-      {userId}/
-        visualappsettings/
-          config/
-            - brandKit
-            - userInfo
-            - campaignVariable
-        recentimages/
-          {imageId}/
-            - url (placeholder)
-            - prompt
-            - createdAt
+localStorage:
+  visualai_brand_kit          - Brand colors, typography, style keywords
+  visualai_user_info          - Company name, social handle, bio
+  visualai_campaign_variable  - Current campaign context
+  visualai_app_preferences    - App settings and preferences
+  visualai_recent_prompts     - Recently used prompts (limited history)
+
+IndexedDB (VisualAIContentStudio):
+  images/                     - Generated images with metadata
+    {imageId}/
+      - id, url, prompt, createdAt, platform, etc.
+  layouts/                    - Layout configurations per image
+    {layoutId}/
+      - id, imageId, platform, layoutData
+  projects/                   - Future: saved projects/campaigns
 ```
 
 ## Performance Considerations
 
 - **Exponential Backoff**: API calls include retry logic with exponential delays
-- **Firestore Optimization**: Only metadata saved (not full base64 images)
+- **Local Storage Optimization**: Small data in localStorage, large data in IndexedDB
 - **Blob URL Management**: Local uploads use revocable blob URLs
-- **Real-time Sync**: Settings auto-save and sync across sessions
+- **Auto-save**: Settings persist locally across sessions
+- **Privacy First**: No data leaves your device unless explicitly shared
 
 ## Social Media Platform Support
 
@@ -229,10 +229,11 @@ Edit system prompts in each AI feature function to adjust behavior:
 
 ## Troubleshooting
 
-### Firebase Connection Issues
-- Verify `firebaseconfig` is valid JSON
-- Check Firestore rules allow read/write for authenticated users
-- Ensure anonymous auth is enabled in Firebase Console
+### Local Storage Issues
+- Ensure browser supports localStorage and IndexedDB
+- Check available storage space (Settings > Storage in browser)
+- Clear browser data if storage seems corrupted
+- Use incognito mode to test with fresh storage
 
 ### Image Generation Failures
 - Confirm Gemini API key is valid
