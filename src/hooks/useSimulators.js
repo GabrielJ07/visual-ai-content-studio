@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useError } from '../utils/errorContext.js';
+import { useError } from '../utils/errorContext.jsx';
 import { errorHandlers, withErrorHandling } from '../utils/errorHandling.js';
 
 /**

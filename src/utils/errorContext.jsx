@@ -68,7 +68,13 @@ export const ErrorProvider = ({ children }) => {
 
   // Network error handling with actionable messages
   const handleNetworkError = useCallback((error, context = '') => {
-    console.error(`Network error${context ? ` in ${context}` : ''}:`, error);
+    // Log to error reporting service instead of console in production
+    if (process.env.NODE_ENV === 'production') {
+      // Send to error reporting service (e.g., Sentry, LogRocket)
+      // errorReportingService.captureException(error, { context: `Network error${context ? ` in ${context}` : ''}` });
+    } else {
+      console.error(`Network error${context ? ` in ${context}` : ''}:`, error);
+    }
     
     let message = 'Something went wrong. Please try again.';
     let action = null;
@@ -106,7 +112,13 @@ export const ErrorProvider = ({ children }) => {
 
   // API error handling with specific context
   const handleApiError = useCallback((error, operation = '') => {
-    console.error(`API error${operation ? ` during ${operation}` : ''}:`, error);
+    // Log to error reporting service instead of console in production
+    if (process.env.NODE_ENV === 'production') {
+      // Send to error reporting service (e.g., Sentry, LogRocket)
+      // errorReportingService.captureException(error, { context: `API error${operation ? ` during ${operation}` : ''}` });
+    } else {
+      console.error(`API error${operation ? ` during ${operation}` : ''}:`, error);
+    }
     
     let message = `Failed to ${operation || 'complete operation'}. Please try again.`;
     let action = null;
@@ -124,7 +136,13 @@ export const ErrorProvider = ({ children }) => {
 
   // Firebase error handling
   const handleFirebaseError = useCallback((error, operation = '') => {
-    console.error(`Firebase error${operation ? ` during ${operation}` : ''}:`, error);
+    // Log to error reporting service instead of console in production
+    if (process.env.NODE_ENV === 'production') {
+      // Send to error reporting service (e.g., Sentry, LogRocket)
+      // errorReportingService.captureException(error, { context: `Firebase error${operation ? ` during ${operation}` : ''}` });
+    } else {
+      console.error(`Firebase error${operation ? ` during ${operation}` : ''}:`, error);
+    }
     
     let message = `Failed to ${operation || 'complete operation'}. Please try again.`;
     let action = null;

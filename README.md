@@ -79,7 +79,17 @@ Create a Firebase project and enable:
 - Authentication (Anonymous & Custom Token)
 
 ### 3. Set Environment Variables
-Inject the following at build/runtime:
+
+**Option A: Using .env file (Recommended for Development)**
+```bash
+# Copy the example file and fill in your values
+cp .env.example .env
+```
+
+Edit `.env` with your actual API keys and configuration values. See `.env.example` for all available options.
+
+**Option B: Runtime Injection (Alternative)**
+You can also inject configuration at runtime:
 ```javascript
 window.firebaseconfig = JSON.stringify({
   apiKey: "YOUR_API_KEY",
@@ -98,14 +108,13 @@ window.appid = "visual-ai-studio";
 npm run dev
 ```
 
-### 5. Access Gemini API
-The app requires a Gemini API key. Update the `apiKey` constants in:
-- `refinePrompt` function
-- `generateCtaSuggestions` function
-- `suggestCampaignTrend` function
-- `generateAltText` function
-- `generateImage` function
-- `generateLayouts` function
+### 5. API Configuration
+All API keys should now be configured via environment variables:
+- **Firebase**: Set via `REACT_APP_FIREBASE_*` variables
+- **Gemini AI**: Set via `REACT_APP_GEMINI_API_KEY`
+- **App ID**: Set via `REACT_APP_APP_ID`
+
+**Important**: Never commit actual API keys to version control. Always use environment variables or runtime injection.
 
 ## Application Structure
 

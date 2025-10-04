@@ -1,8 +1,8 @@
 import React from 'react';
-import { ErrorProvider as ErrorContextProvider } from '../utils/errorContext.js';
+import { ErrorProvider as ErrorContextProvider } from '../utils/errorContext.jsx';
 import { ToastContainer } from './Toast.jsx';
 import ErrorBoundary from './ErrorBoundary.jsx';
-import { useError } from '../utils/errorContext.js';
+import { useError } from '../utils/errorContext.jsx';
 
 // Component that renders the toast container
 const ToastRenderer = () => {
