@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useError } from '../utils/errorContext.jsx';
 import { errorHandlers, withErrorHandling } from '../utils/errorHandling.js';
 
@@ -45,7 +45,7 @@ export const useImageGenerationSimulator = () => {
     showError
   );
 
-  const handleImageGeneration = async () => {
+  const handleImageGeneration = useCallback(async () => {
     try {
       const result = await simulateImageGeneration();
       if (result) {
@@ -56,12 +56,12 @@ export const useImageGenerationSimulator = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [simulateImageGeneration, showSuccess]);
 
-  return {
+  return useMemo(() => ({
     loading,
     handleImageGeneration
-  };
+  }), [loading, handleImageGeneration]);
 };
 
 /**
@@ -72,7 +72,7 @@ export const useFirebaseSimulator = () => {
   const { showError, showSuccess } = useError();
   const [loading, setLoading] = useState(false);
 
-  const simulateFirebaseOperation = async () => {
+  const simulateFirebaseOperation = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -99,12 +99,12 @@ export const useFirebaseSimulator = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showSuccess, showError]);
 
-  return {
+  return useMemo(() => ({
     loading,
     simulateFirebaseOperation
-  };
+  }), [loading, simulateFirebaseOperation]);
 };
 
 /**
@@ -115,7 +115,7 @@ export const useNetworkSimulator = () => {
   const { handleNetworkError, showSuccess } = useError();
   const [loading, setLoading] = useState(false);
 
-  const simulateNetworkRequest = async () => {
+  const simulateNetworkRequest = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -136,12 +136,12 @@ export const useNetworkSimulator = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [handleNetworkError, showSuccess]);
 
-  return {
+  return useMemo(() => ({
     loading,
     simulateNetworkRequest
-  };
+  }), [loading, simulateNetworkRequest]);
 };
 
 /**
@@ -152,7 +152,7 @@ export const useFileUploadSimulator = () => {
   const { showError, showSuccess } = useError();
   const [loading, setLoading] = useState(false);
 
-  const simulateFileUpload = async () => {
+  const simulateFileUpload = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -179,10 +179,10 @@ export const useFileUploadSimulator = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showSuccess, showError]);
 
-  return {
+  return useMemo(() => ({
     loading,
     simulateFileUpload
-  };
+  }), [loading, simulateFileUpload]);
 };

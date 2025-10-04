@@ -5,6 +5,9 @@ import { ZapIcon, UploadIcon } from './Icons.jsx';
  * SimulationButtons component renders the main action buttons for error handling demonstrations
  * Separated from the main ErrorHandlingExample to improve maintainability
  * 
+ * Performance optimized with React.memo to prevent unnecessary re-renders
+ * when parent component updates but props haven't changed.
+ * 
  * @param {Object} props - Component props
  * @param {Function} props.onImageGeneration - Handler for image generation simulation
  * @param {Function} props.onFirebaseOperation - Handler for Firebase operation simulation
@@ -12,7 +15,7 @@ import { ZapIcon, UploadIcon } from './Icons.jsx';
  * @param {Function} props.onFileUpload - Handler for file upload simulation
  * @param {boolean} props.loading - Loading state for all buttons
  */
-const SimulationButtons = ({
+const SimulationButtons = React.memo(({
   onImageGeneration,
   onFirebaseOperation,
   onNetworkRequest,
@@ -56,6 +59,9 @@ const SimulationButtons = ({
       </button>
     </div>
   );
-};
+});
+
+// Display name for debugging
+SimulationButtons.displayName = 'SimulationButtons';
 
 export default SimulationButtons;

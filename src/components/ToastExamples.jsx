@@ -4,13 +4,16 @@ import React from 'react';
  * ToastExamples component demonstrates different toast notification types
  * Separated from the main ErrorHandlingExample for better modularity
  * 
+ * Performance optimized with React.memo to prevent unnecessary re-renders
+ * when parent component updates but toast handlers haven't changed.
+ * 
  * @param {Object} props - Component props
  * @param {Function} props.showInfo - Handler to show info toast
  * @param {Function} props.showSuccess - Handler to show success toast
  * @param {Function} props.showWarning - Handler to show warning toast
  * @param {Function} props.showError - Handler to show error toast
  */
-const ToastExamples = ({ showInfo, showSuccess, showWarning, showError }) => {
+const ToastExamples = React.memo(({ showInfo, showSuccess, showWarning, showError }) => {
   return (
     <div className="pt-4 border-t">
       <h3 className="text-sm font-medium text-gray-700 mb-3">Toast Examples</h3>
@@ -45,6 +48,9 @@ const ToastExamples = ({ showInfo, showSuccess, showWarning, showError }) => {
       </div>
     </div>
   );
-};
+});
+
+// Display name for debugging
+ToastExamples.displayName = 'ToastExamples';
 
 export default ToastExamples;

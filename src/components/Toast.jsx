@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { AlertTriangleIcon, AlertCircleIcon, InfoIcon, CheckCircleIcon, XIcon } from './Icons.jsx';
 
-const Toast = ({ id, type = 'info', message, action, onClose, duration = 5000 }) => {
+const Toast = React.memo(({ id, type = 'info', message, action, onClose, duration = 5000 }) => {
   useEffect(() => {
     if (duration > 0) {
       const timer = setTimeout(() => {
@@ -11,7 +11,8 @@ const Toast = ({ id, type = 'info', message, action, onClose, duration = 5000 })
     }
   }, [id, duration, onClose]);
 
-  const getIcon = () => {
+  // Memoize icon and styles to prevent recalculation on every render
+  const icon = useMemo(() => {
     switch (type) {
       case 'error':
         return <AlertCircleIcon className="w-5 h-5" />;
@@ -22,9 +23,9 @@ const Toast = ({ id, type = 'info', message, action, onClose, duration = 5000 })
       default:
         return <InfoIcon className="w-5 h-5" />;
     }
-  };
+  }, [type]);
 
-  const getStyles = () => {
+  const styles = useMemo(() => {
     switch (type) {
       case 'error':
         return 'bg-red-50 border-red-200 text-red-800';
@@ -35,12 +36,21 @@ const Toast = ({ id, type = 'info', message, action, onClose, duration = 5000 })
       default:
         return 'bg-blue-50 border-blue-200 text-blue-800';
     }
-  };
+  }, [type]);
+
+  // Memoize close handler to prevent unnecessary re-renders
+  const handleClose = useCallback(() => {
+    onClose(id);
+  }, [onClose, id]);
+
+  const handleActionClick = useCallback(() => {
+    action?.onClick();
+  }, [action]);
 
   return (
-    <div className={`flex items-start gap-3 p-4 border rounded-lg shadow-md ${getStyles()} animate-in slide-in-from-right duration-300`}>
+    <div className={`flex items-start gap-3 p-4 border rounded-lg shadow-md ${styles} animate-in slide-in-from-right duration-300`}>
       <div className="flex-shrink-0 mt-0.5">
-        {getIcon()}
+        {icon}
       </div>
       
       <div className="flex-1 min-w-0">
@@ -48,7 +58,7 @@ const Toast = ({ id, type = 'info', message, action, onClose, duration = 5000 })
         {action && (
           <div className="mt-2">
             <button
-              onClick={action.onClick}
+              onClick={handleActionClick}
               className="text-sm underline hover:no-underline font-medium"
             >
               {action.label}
@@ -58,16 +68,19 @@ const Toast = ({ id, type = 'info', message, action, onClose, duration = 5000 })
       </div>
       
       <button
-        onClick={() => onClose(id)}
+        onClick={handleClose}
         className="flex-shrink-0 p-1 hover:bg-black/5 rounded-full transition-colors"
       >
         <XIcon className="w-4 h-4" />
       </button>
     </div>
   );
-};
+});
 
-export const ToastContainer = ({ toasts, onRemoveToast }) => {
+// Display name for debugging
+Toast.displayName = 'Toast';
+
+export const ToastContainer = React.memo(({ toasts, onRemoveToast }) => {
   if (!toasts || toasts.length === 0) return null;
 
   return (
@@ -81,6 +94,9 @@ export const ToastContainer = ({ toasts, onRemoveToast }) => {
       ))}
     </div>
   );
-};
+});
+
+// Display name for debugging
+ToastContainer.displayName = 'ToastContainer';
 
 export default Toast;
