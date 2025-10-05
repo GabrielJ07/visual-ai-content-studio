@@ -116,8 +116,9 @@ dist
 # DynamoDB Local files
 .dynamodb/
 
-# Firebase cache directory
-.firebase/
+# Cloudflare Workers
+.wrangler/
+workers/dist/
 
 # TernJS port file
 .tern-port
