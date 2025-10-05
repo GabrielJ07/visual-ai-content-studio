@@ -110,7 +110,7 @@ export const errorHandlers = {
         return showError(
           'Storage access denied. Please check your credentials.',
   // Local storage errors (replaces Firebase errors)  
-  storage: {
+  localStorage: {
     // Local storage errors
     localStorage: (error, showError, operation = 'operation') => {
       logError(error, 'Local Storage', { operation });
