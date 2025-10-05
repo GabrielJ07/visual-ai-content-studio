@@ -12,8 +12,16 @@ import { getCloudflareConfig } from './config.js';
  */
 class CloudflareStorage {
   constructor() {
-    this.config = getCloudflareConfig();
-    this.baseUrl = this.config.workerUrl;
+    try {
+      this.config = getCloudflareConfig();
+      this.baseUrl = this.config.workerUrl;
+      this.isConfigured = true;
+    } catch (error) {
+      console.warn('Cloudflare storage not configured, using local fallback:', error.message);
+      this.config = null;
+      this.baseUrl = null;
+      this.isConfigured = false;
+    }
   }
 
   /**
@@ -23,6 +31,10 @@ class CloudflareStorage {
    * @returns {Promise<Response>} Response object
    */
   async request(endpoint, options = {}) {
+    if (!this.isConfigured) {
+      throw new Error('Cloudflare storage is not configured. Please check your environment variables.');
+    }
+
     const url = `${this.baseUrl}${endpoint}`;
     const headers = {
       'Content-Type': 'application/json',

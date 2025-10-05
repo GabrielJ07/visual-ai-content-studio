@@ -170,6 +170,11 @@ export const errorHandlers = {
           'Access denied. Please sign in again.',
           {
             label: 'Sign In',
+            onClick: () => window.location.reload()
+          }
+        );
+      }
+      
       return showError(`Failed to ${operation}. Data is stored locally only.`);
     },
 
