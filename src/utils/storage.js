@@ -220,7 +220,7 @@ export const storage = {
   async saveImage(userId, imageBlob, metadata) {
     try {
       const storage = getStorage();
-      const imageId = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const imageId = `img_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
       
       // Upload image and save metadata in parallel
       const [imageUrl] = await Promise.all([
