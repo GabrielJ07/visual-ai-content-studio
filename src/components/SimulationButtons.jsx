@@ -7,14 +7,14 @@ import { ZapIcon, UploadIcon } from './Icons.jsx';
  * 
  * @param {Object} props - Component props
  * @param {Function} props.onImageGeneration - Handler for image generation simulation
- * @param {Function} props.onFirebaseOperation - Handler for Firebase operation simulation
+ * @param {Function} props.onStorageOperation - Handler for storage operation simulation
  * @param {Function} props.onNetworkRequest - Handler for network request simulation
  * @param {Function} props.onFileUpload - Handler for file upload simulation
  * @param {boolean} props.loading - Loading state for all buttons
  */
 const SimulationButtons = ({
   onImageGeneration,
-  onFirebaseOperation,
+  onStorageOperation,
   onNetworkRequest,
   onFileUpload,
   loading
@@ -31,11 +31,11 @@ const SimulationButtons = ({
       </button>
 
       <button
-        onClick={onFirebaseOperation}
+        onClick={onStorageOperation}
         disabled={loading}
         className="flex items-center justify-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        Firebase Operation
+        Storage Operation
       </button>
 
       <button

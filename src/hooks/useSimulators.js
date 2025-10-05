@@ -65,25 +65,26 @@ export const useImageGenerationSimulator = () => {
 };
 
 /**
- * Custom hook for Firebase operation simulation with proper error handling
- * Demonstrates Firebase-specific error patterns
+ * Custom hook for storage operation simulation with proper error handling
+ * Demonstrates Cloudflare R2 storage error patterns
  */
-export const useFirebaseSimulator = () => {
+export const useStorageSimulator = () => {
   const { showError, showSuccess } = useError();
   const [loading, setLoading] = useState(false);
 
-  const simulateFirebaseOperation = async () => {
+  const simulateStorageOperation = async () => {
     try {
       setLoading(true);
       
-      // Simulate Firebase call delay
+      // Simulate storage API call delay
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Simulate Firebase errors
+      // Simulate storage errors
       const errors = [
-        { code: 'permission-denied' },
-        { code: 'unavailable' },
-        { code: 'unauthenticated' },
+        { status: 401, message: 'Unauthorized' },
+        { status: 403, message: 'Forbidden' },
+        { status: 413, message: 'File too large' },
+        { status: 503, message: 'Service unavailable' },
         null // success
       ];
       
@@ -93,9 +94,9 @@ export const useFirebaseSimulator = () => {
         throw error;
       }
       
-      showSuccess('Data saved successfully!');
+      showSuccess('Data saved to storage successfully!');
     } catch (error) {
-      errorHandlers.firebase.firestore(error, showError, 'save settings');
+      errorHandlers.storage.upload(error, showError, 'save data');
     } finally {
       setLoading(false);
     }
@@ -103,7 +104,7 @@ export const useFirebaseSimulator = () => {
 
   return {
     loading,
-    simulateFirebaseOperation
+    simulateStorageOperation
   };
 };
 

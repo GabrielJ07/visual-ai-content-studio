@@ -15,8 +15,7 @@
   },
   "dependencies": {
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "firebase": "^10.7.1"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
@@ -36,7 +35,9 @@
     "content-creation",
     "social-media",
     "react",
-    "firebase",
+    "cloudflare",
+    "r2",
+    "workers",
     "gemini",
     "visual-content",
     "brand-kit"

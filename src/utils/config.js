@@ -18,22 +18,19 @@ const getEnvVar = (key, fallback = null, required = false) => {
   
   // If not found and we're in browser, try window globals (for runtime injection)
   if (!value && typeof window !== 'undefined') {
-    // Handle special cases for Firebase config
-    if (key.startsWith('REACT_APP_FIREBASE_')) {
+    // Handle special cases for Cloudflare config
+    if (key.startsWith('REACT_APP_CLOUDFLARE_')) {
       try {
-        const firebaseConfig = window.firebaseconfig ? JSON.parse(window.firebaseconfig) : null;
-        if (firebaseConfig) {
-          const configKey = key.replace('REACT_APP_FIREBASE_', '').toLowerCase();
-          // Map environment variable names to Firebase config keys
+        const cloudflareConfig = window.cloudflareconfig ? JSON.parse(window.cloudflareconfig) : null;
+        if (cloudflareConfig) {
+          const configKey = key.replace('REACT_APP_CLOUDFLARE_', '').toLowerCase();
+          // Map environment variable names to Cloudflare config keys
           const keyMap = {
-            'api_key': 'apiKey',
-            'auth_domain': 'authDomain',
-            'project_id': 'projectId',
-            'storage_bucket': 'storageBucket',
-            'messaging_sender_id': 'messagingSenderId',
-            'app_id': 'appId'
+            'account_id': 'accountId',
+            'r2_bucket': 'r2Bucket',
+            'api_token': 'apiToken'
           };
-          value = firebaseConfig[keyMap[configKey] || configKey];
+          value = cloudflareConfig[keyMap[configKey] || configKey];
         }
       } catch (e) {
         // Ignore parsing errors
@@ -60,21 +57,19 @@ const getEnvVar = (key, fallback = null, required = false) => {
 };
 
 /**
- * Firebase Configuration
+ * Cloudflare Configuration
  */
-export const getFirebaseConfig = () => {
+export const getCloudflareConfig = () => {
   try {
     return {
-      apiKey: getEnvVar('REACT_APP_FIREBASE_API_KEY', null, true),
-      authDomain: getEnvVar('REACT_APP_FIREBASE_AUTH_DOMAIN', null, true),
-      projectId: getEnvVar('REACT_APP_FIREBASE_PROJECT_ID', null, true),
-      storageBucket: getEnvVar('REACT_APP_FIREBASE_STORAGE_BUCKET', null, true),
-      messagingSenderId: getEnvVar('REACT_APP_FIREBASE_MESSAGING_SENDER_ID', null, true),
-      appId: getEnvVar('REACT_APP_FIREBASE_APP_ID', null, true)
+      accountId: getEnvVar('REACT_APP_CLOUDFLARE_ACCOUNT_ID', null, true),
+      r2Bucket: getEnvVar('REACT_APP_CLOUDFLARE_R2_BUCKET', null, true),
+      apiToken: getEnvVar('REACT_APP_CLOUDFLARE_API_TOKEN', null, true),
+      workerUrl: getEnvVar('REACT_APP_WORKER_URL', null, true)
     };
   } catch (error) {
-    console.error('Firebase configuration error:', error.message);
-    throw new Error('Firebase is not properly configured. Please check your environment variables.');
+    console.error('Cloudflare configuration error:', error.message);
+    throw new Error('Cloudflare is not properly configured. Please check your environment variables.');
   }
 };
 
@@ -121,9 +116,9 @@ export const validateConfiguration = () => {
   const errors = [];
   
   try {
-    getFirebaseConfig();
+    getCloudflareConfig();
   } catch (error) {
-    errors.push(`Firebase: ${error.message}`);
+    errors.push(`Cloudflare: ${error.message}`);
   }
   
   try {
@@ -145,15 +140,16 @@ export const validateConfiguration = () => {
  * Get configuration summary (for debugging, excludes sensitive values)
  */
 export const getConfigSummary = () => {
-  const firebase = getFirebaseConfig();
+  const cloudflare = getCloudflareConfig();
   const gemini = getGeminiConfig();
   const app = getAppConfig();
   
   return {
-    firebase: {
-      projectId: firebase.projectId,
-      authDomain: firebase.authDomain,
-      hasApiKey: !!firebase.apiKey
+    cloudflare: {
+      accountId: cloudflare.accountId,
+      r2Bucket: cloudflare.r2Bucket,
+      hasApiToken: !!cloudflare.apiToken,
+      workerUrl: cloudflare.workerUrl
     },
     gemini: {
       hasApiKey: !!gemini.apiKey,

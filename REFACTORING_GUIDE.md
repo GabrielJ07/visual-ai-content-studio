@@ -18,7 +18,7 @@ The component has been split into focused, maintainable modules:
 #### 1. Custom Hooks (`/src/hooks/useSimulators.js`) - 187 lines
 Extracted business logic into four specialized hooks:
 - `useImageGenerationSimulator()` - Handles image generation simulation with error handling
-- `useFirebaseSimulator()` - Manages Firebase operation simulation
+- `useStorageSimulator()` - Manages storage operation simulation
 - `useNetworkSimulator()` - Controls network request simulation  
 - `useFileUploadSimulator()` - Handles file upload simulation
 

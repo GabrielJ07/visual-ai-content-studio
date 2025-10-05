@@ -134,33 +134,31 @@ export const ErrorProvider = ({ children }) => {
     return showError(message, action);
   }, [showError]);
 
-  // Firebase error handling
-  const handleFirebaseError = useCallback((error, operation = '') => {
+  // Storage error handling (Cloudflare R2)
+  const handleStorageError = useCallback((error, operation = '') => {
     // Log to error reporting service instead of console in production
     if (process.env.NODE_ENV === 'production') {
       // Send to error reporting service (e.g., Sentry, LogRocket)
-      // errorReportingService.captureException(error, { context: `Firebase error${operation ? ` during ${operation}` : ''}` });
+      // errorReportingService.captureException(error, { context: `Storage error${operation ? ` during ${operation}` : ''}` });
     } else {
-      console.error(`Firebase error${operation ? ` during ${operation}` : ''}:`, error);
+      console.error(`Storage error${operation ? ` during ${operation}` : ''}:`, error);
     }
     
     let message = `Failed to ${operation || 'complete operation'}. Please try again.`;
     let action = null;
 
-    if (error.code === 'permission-denied') {
-      message = 'Permission denied. Please sign in again.';
+    if (error.status === 401 || error.status === 403) {
+      message = 'Storage access denied. Please check your credentials.';
       action = {
         label: 'Refresh',
         onClick: () => window.location.reload()
       };
-    } else if (error.code === 'unavailable') {
-      message = 'Service temporarily unavailable. Please try again in a moment.';
-    } else if (error.code === 'unauthenticated') {
-      message = 'Authentication required. Please sign in again.';
-      action = {
-        label: 'Refresh',
-        onClick: () => window.location.reload()
-      };
+    } else if (error.status === 503) {
+      message = 'Storage service temporarily unavailable. Please try again in a moment.';
+    } else if (error.status === 413) {
+      message = 'File too large. Please choose a smaller file.';
+    } else if (error.status === 404) {
+      message = 'Content not found. It may have been deleted or moved.';
     }
 
     return showError(message, action);
@@ -177,7 +175,7 @@ export const ErrorProvider = ({ children }) => {
     showInfo,
     handleNetworkError,
     handleApiError,
-    handleFirebaseError
+    handleStorageError
   };
 
   return (
