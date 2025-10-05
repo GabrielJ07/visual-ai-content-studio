@@ -241,7 +241,7 @@ class AuthManager {
    * @returns {string} Anonymous user ID
    */
   generateAnonymousUserId() {
-    return `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `anon_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 
   /**
