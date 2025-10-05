@@ -14,7 +14,10 @@ export const logError = (error, context = '', additionalInfo = {}) => {
     ...additionalInfo
   };
 
-  if (process.env.NODE_ENV === 'production') {
+  // Check if in production mode (this will be replaced at build time)
+  const isProduction = import.meta.env?.MODE === 'production';
+  
+  if (isProduction) {
     // In production, send to error reporting service
     // Replace with your error reporting service (e.g., Sentry, LogRocket, etc.)
     // errorReportingService.captureException(error, { extra: errorDetails });
