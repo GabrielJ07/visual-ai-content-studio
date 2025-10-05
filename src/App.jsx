@@ -5,33 +5,37 @@
  * error handling, and routing between different pages.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import { ErrorProvider } from './utils/errorContext.jsx';
 import Toast from './components/Toast.jsx';
 import ErrorHandlingExample from './components/ErrorHandlingExample.jsx';
 import { validateConfiguration, getConfigSummary } from './utils/config.js';
+import { ProfilerWrapper, useRenderPerformance } from './utils/performance.jsx';
 
 const App = () => {
   const [configStatus, setConfigStatus] = useState('loading');
   const [configError, setConfigError] = useState(null);
+  
+  // Performance monitoring for the main App component
+  useRenderPerformance('App', [configStatus, configError]);
+
+  // Memoize app initialization function
+  const initializeApp = useCallback(async () => {
+    try {
+      validateConfiguration();
+      const summary = getConfigSummary();
+      console.log('Configuration loaded:', summary);
+      setConfigStatus('ready');
+    } catch (error) {
+      setConfigError(error.message);
+      setConfigStatus('error');
+    }
+  }, []);
 
   useEffect(() => {
-    // Validate configuration on app startup
-    const initializeApp = async () => {
-      try {
-        validateConfiguration();
-        const summary = getConfigSummary();
-        console.log('Configuration loaded:', summary);
-        setConfigStatus('ready');
-      } catch (error) {
-        setConfigError(error.message);
-        setConfigStatus('error');
-      }
-    };
-
     initializeApp();
-  }, []);
+  }, [initializeApp]);
 
   // Show loading state while validating configuration
   if (configStatus === 'loading') {
@@ -93,15 +97,16 @@ const App = () => {
   return (
     <ErrorBoundary>
       <ErrorProvider>
-        <div className="min-h-screen bg-gray-50">
-          {/* Toast Container */}
-          <Toast />
-          
-          {/* Main Content */}
-          <div className="container mx-auto px-4 py-8">
-            <header className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                Visual AI Content Studio
+        <ProfilerWrapper id="App">
+          <div className="min-h-screen bg-gray-50">
+            {/* Toast Container */}
+            <Toast />
+            
+            {/* Main Content */}
+            <div className="container mx-auto px-4 py-8">
+              <header className="text-center mb-8">
+                <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                  Visual AI Content Studio
               </h1>
               <p className="text-lg text-gray-600">
                 AI-Powered Visual Content Creation Platform
@@ -122,8 +127,9 @@ const App = () => {
               <Route path="/settings" element={<SettingsPanel />} />
             </Routes>
             */}
+            </div>
           </div>
-        </div>
+        </ProfilerWrapper>
       </ErrorProvider>
     </ErrorBoundary>
   );

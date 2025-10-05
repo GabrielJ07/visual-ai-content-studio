@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 
 const ErrorContext = createContext();
 
@@ -166,7 +166,8 @@ export const ErrorProvider = ({ children }) => {
     return showError(message, action);
   }, [showError]);
 
-  const value = {
+  // Memoize the context value to prevent unnecessary re-renders of consumers
+  const value = useMemo(() => ({
     toasts,
     addToast,
     removeToast,
@@ -178,7 +179,19 @@ export const ErrorProvider = ({ children }) => {
     handleNetworkError,
     handleApiError,
     handleFirebaseError
-  };
+  }), [
+    toasts,
+    addToast,
+    removeToast,
+    clearToasts,
+    showError,
+    showWarning,
+    showSuccess,
+    showInfo,
+    handleNetworkError,
+    handleApiError,
+    handleFirebaseError
+  ]);
 
   return (
     <ErrorContext.Provider value={value}>
