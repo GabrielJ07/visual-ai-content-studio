@@ -66,7 +66,12 @@ const JWTUtils = {
 class AuthManager {
   constructor() {
     this.config = getAppConfig();
-    this.cloudflareConfig = getCloudflareConfig();
+    try {
+      this.cloudflareConfig = getCloudflareConfig();
+    } catch (error) {
+      console.warn('Cloudflare config not available, proceeding without it:', error);
+      this.cloudflareConfig = undefined;
+    }
     this.currentUser = null;
     this.token = null;
     this.listeners = new Set();
