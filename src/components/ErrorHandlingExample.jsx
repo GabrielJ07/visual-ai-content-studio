@@ -28,14 +28,11 @@ const ErrorHandlingExample = () => {
   const networkSimulator = useNetworkSimulator();
   const fileUploadSimulator = useFileUploadSimulator();
 
-  // Combine loading states from all simulators
-  const isAnyLoading = imageSimulator.loading || storageSimulator.loading || 
-                      networkSimulator.loading || fileUploadSimulator.loading;
   // Memoize loading state calculation to prevent unnecessary recalculations
   const isAnyLoading = useMemo(() => 
-    imageSimulator.loading || firebaseSimulator.loading || 
+    imageSimulator.loading || storageSimulator.loading || 
     networkSimulator.loading || fileUploadSimulator.loading,
-    [imageSimulator.loading, firebaseSimulator.loading, networkSimulator.loading, fileUploadSimulator.loading]
+    [imageSimulator.loading, storageSimulator.loading, networkSimulator.loading, fileUploadSimulator.loading]
   );
 
   return (

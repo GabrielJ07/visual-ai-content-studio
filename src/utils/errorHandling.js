@@ -109,9 +109,23 @@ export const errorHandlers = {
       if (error.status === 401 || error.status === 403) {
         return showError(
           'Storage access denied. Please check your credentials.',
-  // Local storage errors (replaces Firebase errors)  
-  localStorage: {
-    // Local storage errors
+          {
+            label: 'Refresh',
+            onClick: () => window.location.reload()
+          }
+        );
+      }
+      
+      return showError(
+        `Failed to ${operation}. Please try again.`,
+        {
+          label: 'Retry',
+          onClick: () => window.location.reload()
+        }
+      );
+    },
+
+    // Local storage errors (replaces Firebase errors)
     localStorage: (error, showError, operation = 'operation') => {
       logError(error, 'Local Storage', { operation });
       

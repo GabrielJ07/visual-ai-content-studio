@@ -58,10 +58,26 @@ const getEnvVar = (key, fallback = null, required = false) => {
 
 /**
  * Cloudflare Configuration
+ */
+export const getCloudflareConfig = () => {
+  try {
+    return {
+      accountId: getEnvVar('REACT_APP_CLOUDFLARE_ACCOUNT_ID', null, true),
+      r2Bucket: getEnvVar('REACT_APP_CLOUDFLARE_R2_BUCKET', null, true),
+      apiToken: getEnvVar('REACT_APP_CLOUDFLARE_API_TOKEN', null, true),
+      workerUrl: getEnvVar('REACT_APP_WORKER_URL', null, true)
+    };
+  } catch (error) {
+    console.error('Cloudflare configuration error:', error.message);
+    throw new Error('Cloudflare is not properly configured. Please check your environment variables.');
+  }
+};
+
+/**
  * Firebase Configuration (Optional - for legacy compatibility only)
  * Firebase is no longer required as all data is stored locally
  */
-export const getCloudflareConfig = () => {
+export const getFirebaseConfig = () => {
   try {
     // Check if Firebase config is provided (optional)
     const apiKey = getEnvVar('REACT_APP_FIREBASE_API_KEY', null, false);
@@ -72,14 +88,6 @@ export const getCloudflareConfig = () => {
     }
 
     return {
-      accountId: getEnvVar('REACT_APP_CLOUDFLARE_ACCOUNT_ID', null, true),
-      r2Bucket: getEnvVar('REACT_APP_CLOUDFLARE_R2_BUCKET', null, true),
-      apiToken: getEnvVar('REACT_APP_CLOUDFLARE_API_TOKEN', null, true),
-      workerUrl: getEnvVar('REACT_APP_WORKER_URL', null, true)
-    };
-  } catch (error) {
-    console.error('Cloudflare configuration error:', error.message);
-    throw new Error('Cloudflare is not properly configured. Please check your environment variables.');
       apiKey: apiKey,
       authDomain: getEnvVar('REACT_APP_FIREBASE_AUTH_DOMAIN', null, false),
       projectId: getEnvVar('REACT_APP_FIREBASE_PROJECT_ID', null, false),
@@ -139,6 +147,8 @@ export const validateConfiguration = () => {
     getCloudflareConfig();
   } catch (error) {
     errors.push(`Cloudflare: ${error.message}`);
+  }
+  
   // Firebase is now optional - only validate if configured
   const firebaseConfig = getFirebaseConfig();
   if (firebaseConfig) {
@@ -168,6 +178,7 @@ export const validateConfiguration = () => {
  */
 export const getConfigSummary = () => {
   const cloudflare = getCloudflareConfig();
+  const firebase = getFirebaseConfig();
   const gemini = getGeminiConfig();
   const app = getAppConfig();
   
