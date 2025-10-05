@@ -83,7 +83,7 @@ const {
   // Specialized handlers
   handleNetworkError,  // (error, context?) => id
   handleApiError,      // (error, operation?) => id  
-  handleFirebaseError, // (error, operation?) => id
+  handleStorageError, // (error, operation?) => id
   
   // Toast management
   removeToast,   // (id) => void
@@ -104,9 +104,9 @@ errorHandlers.api.imageGeneration(error, showError);
 errorHandlers.api.textGeneration(error, showError);
 errorHandlers.api.layoutGeneration(error, showError);
 
-// Firebase errors  
-errorHandlers.firebase.auth(error, showError);
-errorHandlers.firebase.firestore(error, showError, 'save data');
+// Storage errors  
+errorHandlers.storage.upload(error, showError, 'save data');
+errorHandlers.storage.retrieval(error, showError, 'load data');
 
 // File errors
 errorHandlers.file.upload(error, showError);
@@ -166,15 +166,15 @@ const fetchData = async () => {
 };
 ```
 
-### Firebase Error Handling
+### Storage Error Handling
 
 ```jsx
 const saveSettings = async (settings) => {
   try {
-    await db.collection('settings').doc(userId).set(settings);
+    await storage.saveConfig(userId, settings);
     showSuccess('Settings saved!');
   } catch (error) {
-    handleFirebaseError(error, 'save settings');
+    handleStorageError(error, 'save settings');
   }
 };
 ```
@@ -258,7 +258,7 @@ To replace existing `console.error` usage:
 - [ ] Wrap app with `ErrorProvider`
 - [ ] Replace `console.error` with appropriate `showError` calls
 - [ ] Add actionable error messages with retry options  
-- [ ] Use specialized handlers for API, Firebase, and file operations
+- [ ] Use specialized handlers for API, storage, and file operations
 - [ ] Add success feedback for positive outcomes
 - [ ] Test error scenarios with `ErrorHandlingExample`
 - [ ] Configure production error reporting

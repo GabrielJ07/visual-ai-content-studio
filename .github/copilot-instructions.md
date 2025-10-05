@@ -2,14 +2,14 @@
 
 ## Project Overview
 
-Visual AI Content Studio is an AI-powered visual content creation platform for social media with brand kit management, multi-platform preview, and Firebase integration. The application generates stunning visuals optimized for Instagram, TikTok, YouTube, LinkedIn, and other social platforms using Google's Gemini AI.
+Visual AI Content Studio is an AI-powered visual content creation platform for social media with brand kit management, multi-platform preview, and Cloudflare Workers/R2 integration. The application generates stunning visuals optimized for Instagram, TikTok, YouTube, LinkedIn, and other social platforms using Google's Gemini AI.
 
 ## Technology Stack
 
 - **Frontend**: React 18+ with Hooks
 - **Styling**: Tailwind CSS (inline utility classes)
 - **AI Models**: Google Gemini 2.5 Flash (Text & Image generation)
-- **Backend**: Firebase (Firestore + Authentication)
+- **Backend**: Cloudflare Workers + R2 Storage
 - **Icons**: Custom Lucide-style SVG components
 - **Build Tools**: Modern JavaScript ES6+
 
@@ -25,7 +25,8 @@ src/
 │   ├── PreviewPage.jsx    # Multi-platform preview with AI layouts
 │   └── SchedulePage.jsx   # Deployment scheduling interface
 ├── utils/
-│   ├── firebase.js        # Firebase initialization
+│   ├── storage.js        # Cloudflare R2 storage utilities
+│   ├── auth.js          # JWT authentication for Workers
 │   ├── gemini.js          # Gemini API helpers
 │   └── errorContext.js    # Error handling context (✓ Complete)
 └── constants/
@@ -61,21 +62,21 @@ src/
 
 ### API Integration Patterns
 
-#### Firebase Integration
-- Use Firebase v9+ modular SDK syntax
-- Implement proper authentication with anonymous and custom tokens
-- Use Firestore for data persistence with proper error handling
-- Follow these patterns for data operations:
+#### Cloudflare Integration
+- Use Cloudflare Workers for serverless API endpoints
+- Implement JWT-based authentication suitable for Workers
+- Use R2 storage for persistent image and content storage
+- Follow these patterns for storage operations:
   ```javascript
   // Import pattern
-  import { doc, setDoc, getDoc } from 'firebase/firestore';
+  import { storage, auth } from './utils/storage.js';
   
   // Error handling pattern
   try {
-    const result = await firestoreOperation();
+    const result = await storage.saveConfig(userId, config);
     // Handle success
   } catch (error) {
-    handleFirebaseError(error, 'operation description');
+    handleStorageError(error, 'operation description');
   }
   ```
 
@@ -138,7 +139,7 @@ When adding new social media platforms:
 
 ### Testing & Quality Assurance
 
-- Test Firebase connection and authentication flows
+- Test Cloudflare Workers API and R2 storage connections
 - Validate API integrations with proper error handling
 - Test responsive design across different screen sizes
 - Verify accessibility compliance (WCAG guidelines)
@@ -150,14 +151,14 @@ When adding new social media platforms:
 - Use lazy loading for images and heavy components
 - Optimize bundle size with proper imports
 - Implement caching for repeated API calls
-- Monitor Firebase quota usage
+- Monitor Cloudflare Workers usage and R2 storage quotas
 
 ### Security Guidelines
 
 - Never commit API keys or sensitive credentials
 - Use environment variables for configuration
 - Implement proper input validation and sanitization
-- Follow Firebase security rules best practices
+- Follow Cloudflare Workers security best practices
 - Validate user inputs before AI processing
 
 ### AI Content Guidelines
@@ -174,7 +175,7 @@ When adding new social media platforms:
 ```javascript
 import { useError } from '../utils/errorContext';
 
-const { handleApiError, handleFirebaseError } = useError();
+const { handleApiError, handleStorageError } = useError();
 
 // In async operations
 try {
@@ -211,8 +212,8 @@ const platformConfig = {
 
 ## Debugging Tips
 
-- Check browser console for API errors and Firebase connection issues
-- Verify Firebase configuration in browser storage
+- Check browser console for API errors and Cloudflare connection issues
+- Verify Cloudflare configuration in browser storage
 - Monitor network requests for API call failures
 - Use React Developer Tools for component debugging
 - Check Firestore rules for permission issues

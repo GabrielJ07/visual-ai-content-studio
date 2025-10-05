@@ -27,7 +27,8 @@ src/
 │   ├── PreviewPage.jsx    # Multi-platform preview with AI layouts
 │   └── SchedulePage.jsx   # Deployment scheduling interface
 ├── utils/
-│   ├── firebase.js        # Firebase initialization
+│   ├── storage.js        # Cloudflare R2 storage utilities
+│   ├── auth.js          # JWT authentication for Workers
 │   └── gemini.js          # Gemini API helpers
 └── constants/
     └── platforms.js       # Social platform configurations
@@ -47,12 +48,12 @@ The `paste.txt` file contains a large monolithic React application that needs to
 - `SOCIAL_PLATFORMS` array
 - Platform configurations (Instagram, Facebook, YouTube, etc.)
 
-### 3. src/utils/firebase.js
-**Extract from paste.txt:**
-- `initializeApp` imports
-- Firebase configuration setup
-- Auth and Firestore initialization
-- Path constants (SETTINGS_COLLECTION, SETTINGS_DOC_ID, etc.)
+### 3. src/utils/storage.js ✓
+**Status: COMPLETED**
+- Cloudflare R2 storage utilities
+- JWT authentication for Workers
+- Storage API client with error handling
+- Local storage fallback for development
 
 ### 4. src/utils/gemini.js
 **Extract from paste.txt:**
@@ -124,7 +125,7 @@ The `paste.txt` file contains a large monolithic React application that needs to
 To complete the organization:
 
 1. Extract constants/platforms.js from paste.txt
-2. Extract utils/firebase.js helpers
+2. Extract utils/storage.js and utils/auth.js helpers ✓
 3. Extract utils/gemini.js helpers  
 4. Split the remaining components (SettingsPanel, StudioPage, PreviewPage, SchedulePage)
 5. Create the main App.jsx with imports

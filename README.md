@@ -1,6 +1,6 @@
 # Visual AI Content Studio
 
-An AI-powered visual content creation platform for social media with brand kit management, multi-platform preview, and Firebase integration. Generate stunning visuals optimized for Instagram, TikTok, YouTube, LinkedIn, and more.
+An AI-powered visual content creation platform for social media with brand kit management, multi-platform preview, and Cloudflare R2/Workers integration. Generate stunning visuals optimized for Instagram, TikTok, YouTube, LinkedIn, and more.
 
 ## Features
 
@@ -34,18 +34,20 @@ An AI-powered visual content creation platform for social media with brand kit m
 - **Multi-platform Commit**: Batch schedule across multiple formats
 - **Status Tracking**: Monitor pending, scheduled, and committed posts
 
-### 💾 Local Storage System
-- **Browser Storage**: All data stored locally for privacy
-- **Auto-save Settings**: Persistent user preferences and brand kit
-- **Image History**: Track generation history with IndexedDB
-- **No Cloud Sync**: Complete privacy - data never leaves your device
+### 💾 Cloudflare Integration
+- **R2 Storage**: Persistent image and content storage
+- **Workers API**: Fast serverless backend with global edge deployment
+- **JWT Authentication**: Secure token-based authentication suitable for Workers
+- **Recent Images**: Track generation history with metadata
+
+> **Note:** For privacy-focused users or development, a local storage fallback is available: browser localStorage and IndexedDB are used if Cloudflare config/environment variables are not provided. No data leaves your device in this mode.
 
 ## Tech Stack
 
 - **Frontend**: React 18+ with Hooks
 - **Styling**: Tailwind CSS (inline utility classes)
 - **AI Models**: Google Gemini 2.5 Flash (Text & Image)
-- **Storage**: Browser localStorage + IndexedDB (privacy-first)
+- **Backend**: Cloudflare Workers + R2 Storage (with localStorage/IndexedDB fallback)
 - **Icons**: Lucide-style SVG components
 
 ## Requirements
@@ -59,9 +61,9 @@ An AI-powered visual content creation platform for social media with brand kit m
 
 ### Environment Variables
 The app expects these to be injected at runtime:
-- `firebaseconfig`: (Optional) Legacy Firebase configuration - no longer required
-- `initialauthtoken`: (Optional) Not used in local storage mode
-- `appid`: (Optional) Application identifier for compatibility
+- `cloudflareconfig`: Cloudflare configuration JSON string
+- `initialauthtoken`: (Optional) Custom auth token
+- `appid`: Application identifier for storage paths
 
 ### API Keys
 - **Gemini API Key**: Required for AI features (provided by Canvas runtime)
@@ -70,14 +72,17 @@ The app expects these to be injected at runtime:
 
 ### 1. Install Dependencies
 ```bash
-npm install react firebase
+npm install react
 ```
 
-### 2. Configure Storage (Optional)
-All data is stored locally by default. No external configuration required.
-- Settings: Browser localStorage
-- Images: Browser IndexedDB
-- Privacy: Data never leaves your device
+### 2. Configure Cloudflare
+Set up your Cloudflare infrastructure:
+- Create R2 bucket for storage
+- Deploy Cloudflare Workers for API endpoints
+- Configure authentication and CORS policies
+
+> **Or** use local storage mode for privacy/local dev:  
+> All data is stored locally in your browser using localStorage and IndexedDB; no external configuration required.
 
 ### 3. Set Environment Variables
 
@@ -92,11 +97,14 @@ Edit `.env` with your actual API keys and configuration values. See `.env.exampl
 **Option B: Runtime Injection (Legacy Compatibility)**
 For legacy compatibility, you can inject configuration at runtime, but it's no longer required:
 ```javascript
-// Optional - only needed for backward compatibility
+window.cloudflareconfig = JSON.stringify({
+  accountId: "YOUR_ACCOUNT_ID",
+  r2Bucket: "your-r2-bucket",
+  apiToken: "YOUR_API_TOKEN",
+  workerUrl: "https://your-worker.your-subdomain.workers.dev"
+});
 window.appid = "visual-ai-studio";
-
-// Firebase config no longer required
-// All data is stored locally in the browser
+// Cloudflare config enables cloud sync. If not set, local storage will be used.
 ```
 
 ### 4. Run Development Server
@@ -106,7 +114,7 @@ npm run dev
 
 ### 5. API Configuration
 All API keys should now be configured via environment variables:
-- **Firebase**: Set via `REACT_APP_FIREBASE_*` variables
+- **Cloudflare**: Set via `REACT_APP_CLOUDFLARE_*` variables
 - **Gemini AI**: Set via `REACT_APP_GEMINI_API_KEY`
 - **App ID**: Set via `REACT_APP_APP_ID`
 
@@ -130,9 +138,8 @@ src/
 ├── utils/
 │   ├── errorContext.js    # Error context and hooks (✅ COMPLETED)
 │   ├── errorHandling.js   # Error handling utilities (✅ COMPLETED)
-│   ├── localStorage.js    # Browser localStorage operations
-│   ├── indexedDB.js       # Browser IndexedDB operations
-│   ├── dataStorage.js     # Unified storage abstraction layer
+│   ├── storage.js         # Cloudflare R2 storage utilities (with local fallback)
+│   ├── auth.js            # JWT authentication for Workers
 │   └── gemini.js          # Gemini API helpers
 └── constants/
     └── platforms.js       # Social platform configurations
@@ -167,32 +174,35 @@ src/
 - **Text Generation**: `v1beta/models/gemini-2.5-flash-preview-05-20:generateContent`
 - **Image Generation**: `v1beta/models/gemini-2.5-flash-image-preview:generateContent`
 
-### Local Storage Schema
+### Cloudflare R2 Storage Schema
 ```
-localStorage:
-  visualai_brand_kit          - Brand colors, typography, style keywords
-  visualai_user_info          - Company name, social handle, bio
-  visualai_campaign_variable  - Current campaign context
-  visualai_app_preferences    - App settings and preferences
-  visualai_recent_prompts     - Recently used prompts (limited history)
-
-IndexedDB (VisualAIContentStudio):
-  images/                     - Generated images with metadata
-    {imageId}/
-      - id, url, prompt, createdAt, platform, etc.
-  layouts/                    - Layout configurations per image
-    {layoutId}/
-      - id, imageId, platform, layoutData
-  projects/                   - Future: saved projects/campaigns
+R2 Bucket Structure:
+/{appId}/
+  users/
+    {userId}/
+      settings/
+        config.json        # Brand kit, user info, campaign variables
+      images/
+        {imageId}.jpg      # Generated images
+        {imageId}.json     # Image metadata (prompt, settings, etc.)
+      
+Workers API Endpoints:
+- POST /api/auth/anonymous    # Anonymous authentication
+- POST /api/auth/custom      # Custom token authentication
+- GET/POST /api/settings     # User settings management
+- GET/POST /api/images       # Image metadata operations
+- POST /api/upload           # Image upload to R2
 ```
+> **If using local storage fallback:**  
+> Settings and image metadata are stored in localStorage and IndexedDB, respectively.
 
 ## Performance Considerations
 
 - **Exponential Backoff**: API calls include retry logic with exponential delays
-- **Local Storage Optimization**: Small data in localStorage, large data in IndexedDB
-- **Blob URL Management**: Local uploads use revocable blob URLs
-- **Auto-save**: Settings persist locally across sessions
-- **Privacy First**: No data leaves your device unless explicitly shared
+- **R2 Storage Optimization**: Direct image storage with metadata separation
+- **Blob URL Management**: Local uploads use revocable blob URLs  
+- **Edge Caching**: Cloudflare Workers provide global edge performance
+- **JWT Authentication**: Stateless authentication suitable for serverless
 
 ## Social Media Platform Support
 
@@ -229,11 +239,11 @@ Edit system prompts in each AI feature function to adjust behavior:
 
 ## Troubleshooting
 
-### Local Storage Issues
-- Ensure browser supports localStorage and IndexedDB
-- Check available storage space (Settings > Storage in browser)
-- Clear browser data if storage seems corrupted
-- Use incognito mode to test with fresh storage
+### Cloudflare Connection Issues
+- Verify `cloudflareconfig` is valid JSON
+- Check R2 bucket permissions and CORS settings
+- Ensure Workers are deployed and accessible
+- Verify API tokens have correct permissions
 
 ### Image Generation Failures
 - Confirm Gemini API key is valid
@@ -269,4 +279,4 @@ For issues, questions, or feature requests, please open an issue on GitHub.
 
 ---
 
-**Built with ❤️ using React, Firebase, and Google Gemini AI**
+**Built with ❤️ using React, Cloudflare Workers, R2 Storage, and Google Gemini AI**

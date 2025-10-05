@@ -90,8 +90,27 @@ export const errorHandlers = {
     }
   },
 
-  // Local storage errors (replaces Firebase errors)  
+  // Storage errors (Cloudflare R2)
   storage: {
+    // Upload errors
+    upload: (error, showError, operation = 'upload') => {
+      logError(error, 'Storage Upload', { operation });
+      
+      if (error.status === 413) {
+        return showError(
+          'File too large. Please choose a smaller file (max 10MB).',
+          {
+            label: 'Try Again',
+            onClick: () => document.getElementById('file-input')?.click()
+          }
+        );
+      }
+      
+      if (error.status === 401 || error.status === 403) {
+        return showError(
+          'Storage access denied. Please check your credentials.',
+  // Local storage errors (replaces Firebase errors)  
+  localStorage: {
     // Local storage errors
     localStorage: (error, showError, operation = 'operation') => {
       logError(error, 'Local Storage', { operation });
@@ -111,6 +130,32 @@ export const errorHandlers = {
         );
       }
       
+      if (error.status === 503) {
+        return showError(
+          'Storage service temporarily unavailable. Please try again in a moment.',
+          {
+            label: 'Retry',
+            onClick: () => window.location.reload()
+          }
+        );
+      }
+      
+      return showError(`Failed to ${operation}. Please try again.`);
+    },
+
+    // Retrieval errors
+    retrieval: (error, showError, operation = 'retrieve data') => {
+      logError(error, 'Storage Retrieval', { operation });
+      
+      if (error.status === 404) {
+        return showError(`Content not found. It may have been deleted or moved.`);
+      }
+      
+      if (error.status === 401 || error.status === 403) {
+        return showError(
+          'Access denied. Please sign in again.',
+          {
+            label: 'Sign In',
       return showError(`Failed to ${operation}. Data is stored locally only.`);
     },
 

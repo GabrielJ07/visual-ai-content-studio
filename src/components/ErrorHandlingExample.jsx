@@ -3,7 +3,7 @@ import { useError } from '../utils/errorContext.jsx';
 import { AlertTriangleIcon } from './Icons.jsx';
 import { 
   useImageGenerationSimulator, 
-  useFirebaseSimulator, 
+  useStorageSimulator, 
   useNetworkSimulator, 
   useFileUploadSimulator 
 } from '../hooks/useSimulators.js';
@@ -24,10 +24,13 @@ const ErrorHandlingExample = () => {
   
   // Use custom hooks for simulation logic
   const imageSimulator = useImageGenerationSimulator();
-  const firebaseSimulator = useFirebaseSimulator();
+  const storageSimulator = useStorageSimulator();
   const networkSimulator = useNetworkSimulator();
   const fileUploadSimulator = useFileUploadSimulator();
 
+  // Combine loading states from all simulators
+  const isAnyLoading = imageSimulator.loading || storageSimulator.loading || 
+                      networkSimulator.loading || fileUploadSimulator.loading;
   // Memoize loading state calculation to prevent unnecessary recalculations
   const isAnyLoading = useMemo(() => 
     imageSimulator.loading || firebaseSimulator.loading || 
@@ -52,7 +55,7 @@ const ErrorHandlingExample = () => {
       <div className="space-y-4">
         <SimulationButtons 
           onImageGeneration={imageSimulator.handleImageGeneration}
-          onFirebaseOperation={firebaseSimulator.simulateFirebaseOperation}
+          onStorageOperation={storageSimulator.simulateStorageOperation}
           onNetworkRequest={networkSimulator.simulateNetworkRequest}
           onFileUpload={fileUploadSimulator.simulateFileUpload}
           loading={isAnyLoading}

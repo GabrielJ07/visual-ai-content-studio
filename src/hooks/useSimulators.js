@@ -58,6 +58,48 @@ const handleImageGeneration = useCallback(async () => { try { const result = awa
 return useMemo(() => ({ loading, handleImageGeneration }), [loading, handleImageGeneration]); };
 
 /**
+ * Custom hook for storage operation simulation with proper error handling
+ * Demonstrates Cloudflare R2 storage error patterns
+ */
+export const useStorageSimulator = () => {
+  const { showError, showSuccess } = useError();
+  const [loading, setLoading] = useState(false);
+
+  const simulateStorageOperation = async () => {
+    try {
+      setLoading(true);
+      
+      // Simulate storage API call delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Simulate storage errors
+      const errors = [
+        { status: 401, message: 'Unauthorized' },
+        { status: 403, message: 'Forbidden' },
+        { status: 413, message: 'File too large' },
+        { status: 503, message: 'Service unavailable' },
+        null // success
+      ];
+      
+      const error = errors[Math.floor(Math.random() * errors.length)];
+      
+      if (error) {
+        throw error;
+      }
+      
+      showSuccess('Data saved to storage successfully!');
+    } catch (error) {
+      errorHandlers.storage.upload(error, showError, 'save data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    loading,
+    simulateStorageOperation
+  };
+};
 
 Custom hook for local storage operation simulation with proper error handling
 Demonstrates storage-specific error patterns (replaces Firebase simulator) */ export const useStorageSimulator = () => { const { showError, showSuccess } = useError(); const [loading, setLoading] = useState(false);
