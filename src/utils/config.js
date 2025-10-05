@@ -58,9 +58,19 @@ const getEnvVar = (key, fallback = null, required = false) => {
 
 /**
  * Cloudflare Configuration
+ * Firebase Configuration (Optional - for legacy compatibility only)
+ * Firebase is no longer required as all data is stored locally
  */
 export const getCloudflareConfig = () => {
   try {
+    // Check if Firebase config is provided (optional)
+    const apiKey = getEnvVar('REACT_APP_FIREBASE_API_KEY', null, false);
+    
+    if (!apiKey) {
+      // Return null if Firebase is not configured - this is fine
+      return null;
+    }
+
     return {
       accountId: getEnvVar('REACT_APP_CLOUDFLARE_ACCOUNT_ID', null, true),
       r2Bucket: getEnvVar('REACT_APP_CLOUDFLARE_R2_BUCKET', null, true),
@@ -70,6 +80,16 @@ export const getCloudflareConfig = () => {
   } catch (error) {
     console.error('Cloudflare configuration error:', error.message);
     throw new Error('Cloudflare is not properly configured. Please check your environment variables.');
+      apiKey: apiKey,
+      authDomain: getEnvVar('REACT_APP_FIREBASE_AUTH_DOMAIN', null, false),
+      projectId: getEnvVar('REACT_APP_FIREBASE_PROJECT_ID', null, false),
+      storageBucket: getEnvVar('REACT_APP_FIREBASE_STORAGE_BUCKET', null, false),
+      messagingSenderId: getEnvVar('REACT_APP_FIREBASE_MESSAGING_SENDER_ID', null, false),
+      appId: getEnvVar('REACT_APP_FIREBASE_APP_ID', null, false)
+    };
+  } catch (error) {
+    console.warn('Firebase configuration warning:', error.message);
+    return null; // Firebase is optional now
   }
 };
 
@@ -109,8 +129,8 @@ export const getErrorReportingConfig = () => {
 };
 
 /**
- * Validate all required configuration
- * Call this at app startup to fail fast if configuration is missing
+ * Validate required configuration
+ * Call this at app startup to fail fast if essential configuration is missing
  */
 export const validateConfiguration = () => {
   const errors = [];
@@ -119,8 +139,15 @@ export const validateConfiguration = () => {
     getCloudflareConfig();
   } catch (error) {
     errors.push(`Cloudflare: ${error.message}`);
+  // Firebase is now optional - only validate if configured
+  const firebaseConfig = getFirebaseConfig();
+  if (firebaseConfig) {
+    console.log('✅ Firebase configuration detected (legacy mode)');
+  } else {
+    console.log('ℹ️ Firebase not configured - using local storage only');
   }
   
+  // Gemini AI is still required for content generation
   try {
     getGeminiConfig();
   } catch (error) {
@@ -133,7 +160,7 @@ export const validateConfiguration = () => {
     throw new Error(errorMessage);
   }
   
-  console.log('✅ All configuration validated successfully');
+  console.log('✅ Essential configuration validated successfully');
 };
 
 /**
@@ -151,6 +178,11 @@ export const getConfigSummary = () => {
       hasApiToken: !!cloudflare.apiToken,
       workerUrl: cloudflare.workerUrl
     },
+    firebase: firebase ? {
+      projectId: firebase.projectId,
+      authDomain: firebase.authDomain,
+      hasApiKey: !!firebase.apiKey
+    } : null,
     gemini: {
       hasApiKey: !!gemini.apiKey,
       textModel: gemini.textModel,
@@ -160,6 +192,11 @@ export const getConfigSummary = () => {
       appId: app.appId,
       environment: app.environment,
       hasInitialAuthToken: !!app.initialAuthToken
+    },
+    storage: {
+      mode: 'local',
+      localStorage: typeof localStorage !== 'undefined',
+      indexedDB: 'indexedDB' in window
     }
   };
 };

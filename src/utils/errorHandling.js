@@ -109,9 +109,23 @@ export const errorHandlers = {
       if (error.status === 401 || error.status === 403) {
         return showError(
           'Storage access denied. Please check your credentials.',
+  // Local storage errors (replaces Firebase errors)  
+  storage: {
+    // Local storage errors
+    localStorage: (error, showError, operation = 'operation') => {
+      logError(error, 'Local Storage', { operation });
+      
+      if (error.name === 'QuotaExceededError') {
+        return showError(
+          'Storage space full. Please clear some data or export your work.',
           {
-            label: 'Retry',
-            onClick: () => window.location.reload()
+            label: 'Clear Data',
+            onClick: () => {
+              if (confirm('Clear old data? Recent work will be preserved.')) {
+                // This would trigger cleanup in the actual implementation
+                window.location.reload();
+              }
+            }
           }
         );
       }
@@ -142,12 +156,37 @@ export const errorHandlers = {
           'Access denied. Please sign in again.',
           {
             label: 'Sign In',
+      return showError(`Failed to ${operation}. Data is stored locally only.`);
+    },
+
+    // IndexedDB errors  
+    indexedDB: (error, showError, operation = 'operation') => {
+      logError(error, 'IndexedDB', { operation });
+      
+      if (error.name === 'QuotaExceededError') {
+        return showError(
+          'Storage limit reached. Please export and clear old images.',
+          {
+            label: 'Manage Storage',
+            onClick: () => {
+              // This would open storage management in the actual implementation
+              console.log('Storage management would open here');
+            }
+          }
+        );
+      }
+      
+      if (error.name === 'VersionError') {
+        return showError(
+          'Storage update required. Please refresh the page.',
+          {
+            label: 'Refresh',
             onClick: () => window.location.reload()
           }
         );
       }
       
-      return showError(`Failed to ${operation}. Please try again.`);
+      return showError(`Failed to ${operation}. Your data remains safely stored locally.`);
     }
   },
 

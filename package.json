@@ -38,9 +38,11 @@
     "cloudflare",
     "r2",
     "workers",
+    "local-storage",
     "gemini",
     "visual-content",
-    "brand-kit"
+    "brand-kit",
+    "privacy-first"
   ],
   "author": "Visual AI Content Studio Team",
   "license": "MIT",

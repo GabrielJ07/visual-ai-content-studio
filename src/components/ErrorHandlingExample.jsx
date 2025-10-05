@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useError } from '../utils/errorContext.jsx';
 import { AlertTriangleIcon } from './Icons.jsx';
 import { 
@@ -31,6 +31,12 @@ const ErrorHandlingExample = () => {
   // Combine loading states from all simulators
   const isAnyLoading = imageSimulator.loading || storageSimulator.loading || 
                       networkSimulator.loading || fileUploadSimulator.loading;
+  // Memoize loading state calculation to prevent unnecessary recalculations
+  const isAnyLoading = useMemo(() => 
+    imageSimulator.loading || firebaseSimulator.loading || 
+    networkSimulator.loading || fileUploadSimulator.loading,
+    [imageSimulator.loading, firebaseSimulator.loading, networkSimulator.loading, fileUploadSimulator.loading]
+  );
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">

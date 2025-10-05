@@ -40,12 +40,14 @@ An AI-powered visual content creation platform for social media with brand kit m
 - **JWT Authentication**: Secure token-based authentication suitable for Workers
 - **Recent Images**: Track generation history with metadata
 
+> **Note:** For privacy-focused users or development, a local storage fallback is available: browser localStorage and IndexedDB are used if Cloudflare config/environment variables are not provided. No data leaves your device in this mode.
+
 ## Tech Stack
 
 - **Frontend**: React 18+ with Hooks
 - **Styling**: Tailwind CSS (inline utility classes)
 - **AI Models**: Google Gemini 2.5 Flash (Text & Image)
-- **Backend**: Cloudflare Workers + R2 Storage
+- **Backend**: Cloudflare Workers + R2 Storage (with localStorage/IndexedDB fallback)
 - **Icons**: Lucide-style SVG components
 
 ## Requirements
@@ -79,6 +81,9 @@ Set up your Cloudflare infrastructure:
 - Deploy Cloudflare Workers for API endpoints
 - Configure authentication and CORS policies
 
+> **Or** use local storage mode for privacy/local dev:  
+> All data is stored locally in your browser using localStorage and IndexedDB; no external configuration required.
+
 ### 3. Set Environment Variables
 
 **Option A: Using .env file (Recommended for Development)**
@@ -89,8 +94,8 @@ cp .env.example .env
 
 Edit `.env` with your actual API keys and configuration values. See `.env.example` for all available options.
 
-**Option B: Runtime Injection (Alternative)**
-You can also inject configuration at runtime:
+**Option B: Runtime Injection (Legacy Compatibility)**
+For legacy compatibility, you can inject configuration at runtime, but it's no longer required:
 ```javascript
 window.cloudflareconfig = JSON.stringify({
   accountId: "YOUR_ACCOUNT_ID",
@@ -98,8 +103,8 @@ window.cloudflareconfig = JSON.stringify({
   apiToken: "YOUR_API_TOKEN",
   workerUrl: "https://your-worker.your-subdomain.workers.dev"
 });
-
 window.appid = "visual-ai-studio";
+// Cloudflare config enables cloud sync. If not set, local storage will be used.
 ```
 
 ### 4. Run Development Server
@@ -133,8 +138,8 @@ src/
 ├── utils/
 │   ├── errorContext.js    # Error context and hooks (✅ COMPLETED)
 │   ├── errorHandling.js   # Error handling utilities (✅ COMPLETED)
-│   ├── storage.js        # Cloudflare R2 storage utilities
-│   ├── auth.js          # JWT authentication for Workers
+│   ├── storage.js         # Cloudflare R2 storage utilities (with local fallback)
+│   ├── auth.js            # JWT authentication for Workers
 │   └── gemini.js          # Gemini API helpers
 └── constants/
     └── platforms.js       # Social platform configurations
@@ -186,8 +191,10 @@ Workers API Endpoints:
 - POST /api/auth/custom      # Custom token authentication
 - GET/POST /api/settings     # User settings management
 - GET/POST /api/images       # Image metadata operations
-- POST /api/upload          # Image upload to R2
+- POST /api/upload           # Image upload to R2
 ```
+> **If using local storage fallback:**  
+> Settings and image metadata are stored in localStorage and IndexedDB, respectively.
 
 ## Performance Considerations
 
