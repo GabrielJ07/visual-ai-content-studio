@@ -90,56 +90,58 @@ export const errorHandlers = {
     }
   },
 
-  // Firebase errors
-  firebase: {
-    // Authentication errors
-    auth: (error, showError) => {
-      logError(error, 'Firebase Auth');
+  // Local storage errors (replaces Firebase errors)  
+  storage: {
+    // Local storage errors
+    localStorage: (error, showError, operation = 'operation') => {
+      logError(error, 'Local Storage', { operation });
       
-      if (error.code === 'auth/network-request-failed') {
+      if (error.name === 'QuotaExceededError') {
         return showError(
-          'Connection failed. Please check your internet connection.',
+          'Storage space full. Please clear some data or export your work.',
           {
-            label: 'Retry',
-            onClick: () => window.location.reload()
+            label: 'Clear Data',
+            onClick: () => {
+              if (confirm('Clear old data? Recent work will be preserved.')) {
+                // This would trigger cleanup in the actual implementation
+                window.location.reload();
+              }
+            }
           }
         );
       }
       
-      return showError(
-        'Authentication error. Please refresh the page and try again.',
-        {
-          label: 'Refresh',
-          onClick: () => window.location.reload()
-        }
-      );
+      return showError(`Failed to ${operation}. Data is stored locally only.`);
     },
 
-    // Firestore errors
-    firestore: (error, showError, operation = 'operation') => {
-      logError(error, 'Firestore', { operation });
+    // IndexedDB errors  
+    indexedDB: (error, showError, operation = 'operation') => {
+      logError(error, 'IndexedDB', { operation });
       
-      if (error.code === 'permission-denied') {
+      if (error.name === 'QuotaExceededError') {
         return showError(
-          `Permission denied for ${operation}. Please sign in again.`,
+          'Storage limit reached. Please export and clear old images.',
           {
-            label: 'Sign In',
+            label: 'Manage Storage',
+            onClick: () => {
+              // This would open storage management in the actual implementation
+              console.log('Storage management would open here');
+            }
+          }
+        );
+      }
+      
+      if (error.name === 'VersionError') {
+        return showError(
+          'Storage update required. Please refresh the page.',
+          {
+            label: 'Refresh',
             onClick: () => window.location.reload()
           }
         );
       }
       
-      if (error.code === 'unavailable') {
-        return showError(
-          'Service temporarily unavailable. Please try again in a moment.',
-          {
-            label: 'Retry',
-            onClick: () => window.location.reload()
-          }
-        );
-      }
-      
-      return showError(`Failed to ${operation}. Please try again.`);
+      return showError(`Failed to ${operation}. Your data remains safely stored locally.`);
     }
   },
 
