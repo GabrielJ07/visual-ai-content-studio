@@ -177,6 +177,10 @@ class AuthManager {
    * @returns {Promise<Object>} Response with token
    */
   async requestAnonymousToken() {
+    if (!this.cloudflareConfig) {
+      throw new Error('Cloudflare configuration not available');
+    }
+
     const response = await fetch(`${this.cloudflareConfig.workerUrl}/api/auth/anonymous`, {
       method: 'POST',
       headers: {
@@ -200,6 +204,10 @@ class AuthManager {
    */
   async signInWithCustomToken(customToken) {
     try {
+      if (!this.cloudflareConfig) {
+        throw new Error('Cloudflare configuration not available');
+      }
+
       const response = await fetch(`${this.cloudflareConfig.workerUrl}/api/auth/custom`, {
         method: 'POST',
         headers: {

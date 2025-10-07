@@ -13,8 +13,8 @@
  * @returns {string} The configuration value
  */
 const getEnvVar = (key, fallback = null, required = false) => {
-  // Try environment variable first
-  let value = process.env[key];
+  // Try environment variable first (Vite will inject these during build)
+  let value = typeof process !== 'undefined' ? process.env?.[key] : import.meta.env?.[key];
   
   // If not found and we're in browser, try window globals (for runtime injection)
   if (!value && typeof window !== 'undefined') {
@@ -58,10 +58,26 @@ const getEnvVar = (key, fallback = null, required = false) => {
 
 /**
  * Cloudflare Configuration
+ */
+export const getCloudflareConfig = () => {
+  try {
+    return {
+      accountId: getEnvVar('REACT_APP_CLOUDFLARE_ACCOUNT_ID', null, true),
+      r2Bucket: getEnvVar('REACT_APP_CLOUDFLARE_R2_BUCKET', null, true),
+      apiToken: getEnvVar('REACT_APP_CLOUDFLARE_API_TOKEN', null, true),
+      workerUrl: getEnvVar('REACT_APP_WORKER_URL', null, true)
+    };
+  } catch (error) {
+    console.error('Cloudflare configuration error:', error.message);
+    throw new Error('Cloudflare is not properly configured. Please check your environment variables.');
+  }
+};
+
+/**
  * Firebase Configuration (Optional - for legacy compatibility only)
  * Firebase is no longer required as all data is stored locally
  */
-export const getCloudflareConfig = () => {
+export const getFirebaseConfig = () => {
   try {
     // Check if Firebase config is provided (optional)
     const apiKey = getEnvVar('REACT_APP_FIREBASE_API_KEY', null, false);
@@ -72,14 +88,6 @@ export const getCloudflareConfig = () => {
     }
 
     return {
-      accountId: getEnvVar('REACT_APP_CLOUDFLARE_ACCOUNT_ID', null, true),
-      r2Bucket: getEnvVar('REACT_APP_CLOUDFLARE_R2_BUCKET', null, true),
-      apiToken: getEnvVar('REACT_APP_CLOUDFLARE_API_TOKEN', null, true),
-      workerUrl: getEnvVar('REACT_APP_WORKER_URL', null, true)
-    };
-  } catch (error) {
-    console.error('Cloudflare configuration error:', error.message);
-    throw new Error('Cloudflare is not properly configured. Please check your environment variables.');
       apiKey: apiKey,
       authDomain: getEnvVar('REACT_APP_FIREBASE_AUTH_DOMAIN', null, false),
       projectId: getEnvVar('REACT_APP_FIREBASE_PROJECT_ID', null, false),
@@ -97,7 +105,7 @@ export const getCloudflareConfig = () => {
  * Gemini AI Configuration
  */
 export const getGeminiConfig = () => {
-  const apiKey = getEnvVar('REACT_APP_GEMINI_API_KEY', null, true);
+  const apiKey = getEnvVar('REACT_APP_GEMINI_API_KEY', null, false);
   
   return {
     apiKey,
@@ -137,8 +145,11 @@ export const validateConfiguration = () => {
   
   try {
     getCloudflareConfig();
+    console.log('✅ Cloudflare configuration available');
   } catch (error) {
-    errors.push(`Cloudflare: ${error.message}`);
+    console.log('ℹ️ Cloudflare not configured - using local storage only:', error.message);
+  }
+  
   // Firebase is now optional - only validate if configured
   const firebaseConfig = getFirebaseConfig();
   if (firebaseConfig) {
@@ -147,11 +158,16 @@ export const validateConfiguration = () => {
     console.log('ℹ️ Firebase not configured - using local storage only');
   }
   
-  // Gemini AI is still required for content generation
+  // Gemini AI is optional for demo
   try {
-    getGeminiConfig();
+    const gemini = getGeminiConfig();
+    if (gemini.apiKey) {
+      console.log('✅ Gemini AI configured');
+    } else {
+      console.log('ℹ️ Gemini AI not configured - some features may be limited');
+    }
   } catch (error) {
-    errors.push(`Gemini AI: ${error.message}`);
+    console.log('ℹ️ Gemini AI error:', error.message);
   }
   
   if (errors.length > 0) {
@@ -167,17 +183,24 @@ export const validateConfiguration = () => {
  * Get configuration summary (for debugging, excludes sensitive values)
  */
 export const getConfigSummary = () => {
-  const cloudflare = getCloudflareConfig();
+  let cloudflare = null;
+  try {
+    cloudflare = getCloudflareConfig();
+  } catch (error) {
+    // Cloudflare not configured
+  }
+  
+  const firebase = getFirebaseConfig();
   const gemini = getGeminiConfig();
   const app = getAppConfig();
   
   return {
-    cloudflare: {
+    cloudflare: cloudflare ? {
       accountId: cloudflare.accountId,
       r2Bucket: cloudflare.r2Bucket,
       hasApiToken: !!cloudflare.apiToken,
       workerUrl: cloudflare.workerUrl
-    },
+    } : null,
     firebase: firebase ? {
       projectId: firebase.projectId,
       authDomain: firebase.authDomain,

@@ -177,8 +177,6 @@ export const ErrorProvider = ({ children }) => {
     handleNetworkError,
     handleApiError,
     handleStorageError
-  };
-    handleFirebaseError
   }), [
     toasts,
     addToast,
@@ -190,7 +188,7 @@ export const ErrorProvider = ({ children }) => {
     showInfo,
     handleNetworkError,
     handleApiError,
-    handleFirebaseError
+    handleStorageError
   ]);
 
   return (
