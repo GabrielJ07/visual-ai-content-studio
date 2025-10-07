@@ -142,7 +142,7 @@ const StudioPage = ({ generatedImage, setGeneratedImage, altText, setAltText }) 
                 value={altText}
                 onChange={(e) => setAltText(e.target.value)}
               />
-               <a
+              <a
                 href={generatedImage}
                 download="ai-generated-visual.png"
                 className="mt-4 w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
