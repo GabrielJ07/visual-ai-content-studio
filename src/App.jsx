@@ -9,16 +9,22 @@ import React, { useEffect, useState, useCallback } from 'react';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import { ErrorProvider } from './utils/errorContext.jsx';
 import Toast from './components/Toast.jsx';
-import ErrorHandlingExample from './components/ErrorHandlingExample.jsx';
+import { Routes, Route, NavLink } from 'react-router-dom';
+import StudioPage from './components/StudioPage.jsx';
+import PreviewPage from './components/PreviewPage.jsx';
+import SchedulePage from './components/SchedulePage.jsx';
+import SettingsPanel from './components/SettingsPanel.jsx';
 import { validateConfiguration, getConfigSummary } from './utils/config.js';
 import { ProfilerWrapper, useRenderPerformance } from './utils/performance.jsx';
 
 const App = () => {
   const [configStatus, setConfigStatus] = useState('loading');
   const [configError, setConfigError] = useState(null);
+  const [generatedImage, setGeneratedImage] = useState(null);
+  const [altText, setAltText] = useState('');
   
   // Performance monitoring for the main App component
-  useRenderPerformance('App', [configStatus, configError]);
+  useRenderPerformance('App', [configStatus, configError, generatedImage]);
 
   // Memoize app initialization function
   const initializeApp = useCallback(async () => {
@@ -93,44 +99,71 @@ const App = () => {
     );
   }
 
+  const navLinkClasses = ({ isActive }) =>
+    `px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+      isActive
+        ? 'bg-blue-600 text-white'
+        : 'text-gray-700 hover:bg-gray-200'
+    }`;
+
   // Main application render
   return (
     <ErrorBoundary>
-      <ErrorProvider>
-        <ProfilerWrapper id="App">
-          <div className="min-h-screen bg-gray-50">
-            {/* Toast Container */}
-            <Toast />
-            
-            {/* Main Content */}
-            <div className="container mx-auto px-4 py-8">
-              <header className="text-center mb-8">
-                <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                  Visual AI Content Studio
+      <ProfilerWrapper id="App">
+        <div className="min-h-screen bg-gray-50">
+          <div className="container mx-auto px-4 py-8">
+            <header className="text-center mb-8">
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                Visual AI Content Studio
               </h1>
               <p className="text-lg text-gray-600">
                 AI-Powered Visual Content Creation Platform
               </p>
             </header>
 
-            {/* Temporary: Show error handling example */}
-            <main>
-              <ErrorHandlingExample />
-            </main>
+            <nav className="mb-8 flex justify-center space-x-4 bg-gray-100 p-2 rounded-lg">
+              <NavLink to="/" className={navLinkClasses} end>Studio</NavLink>
+              <NavLink to="/preview" className={navLinkClasses}>Preview</NavLink>
+              <NavLink to="/schedule" className={navLinkClasses}>Schedule</NavLink>
+              <NavLink to="/settings" className={navLinkClasses}>Settings</NavLink>
+            </nav>
 
-            {/* Future: This will contain the main application components */}
-            {/* 
-            <Routes>
-              <Route path="/" element={<StudioPage />} />
-              <Route path="/preview" element={<PreviewPage />} />
-              <Route path="/schedule" element={<SchedulePage />} />
-              <Route path="/settings" element={<SettingsPanel />} />
-            </Routes>
-            */}
-            </div>
+            <ErrorProvider>
+              {/* Toast Container needs to be within ErrorProvider */}
+              <Toast />
+
+              <main>
+                <Routes>
+                  <Route
+                    path="/"
+                    element={<StudioPage
+                      generatedImage={generatedImage}
+                      setGeneratedImage={setGeneratedImage}
+                      altText={altText}
+                      setAltText={setAltText}
+                    />}
+                  />
+                  <Route
+                    path="/preview"
+                    element={<PreviewPage
+                      generatedImage={generatedImage}
+                      altText={altText}
+                    />}
+                  />
+                  <Route
+                    path="/schedule"
+                    element={<SchedulePage
+                      generatedImage={generatedImage}
+                      altText={altText}
+                    />}
+                  />
+                  <Route path="/settings" element={<SettingsPanel />} />
+                </Routes>
+              </main>
+            </ErrorProvider>
           </div>
-        </ProfilerWrapper>
-      </ErrorProvider>
+        </div>
+      </ProfilerWrapper>
     </ErrorBoundary>
   );
 };
