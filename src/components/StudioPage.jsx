@@ -66,7 +66,10 @@ const StudioPage = ({ generatedImage, setGeneratedImage, altText, setAltText }) 
       setGeneratedImage(imageData);
       showSuccess('Image generated successfully!');
       // Generate alt text automatically
-      const generatedAlt = await generateAltText(imageData.split(',')[1]);
+      // The imageData can be a data URL, but we handle cases where it might not be.
+      const imageParts = imageData.split(',');
+      const base64Data = imageParts.length > 1 ? imageParts[1] : imageData;
+      const generatedAlt = await generateAltText(base64Data);
       setAltText(generatedAlt);
     } catch (error) {
       showError(`Failed to generate image: ${error.message}`);
@@ -142,7 +145,7 @@ const StudioPage = ({ generatedImage, setGeneratedImage, altText, setAltText }) 
                 value={altText}
                 onChange={(e) => setAltText(e.target.value)}
               />
-              <a
+               <a
                 href={generatedImage}
                 download="ai-generated-visual.png"
                 className="mt-4 w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
