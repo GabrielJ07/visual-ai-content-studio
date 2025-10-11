@@ -14,6 +14,7 @@ import StudioPage from './components/StudioPage.jsx';
 import PreviewPage from './components/PreviewPage.jsx';
 import SchedulePage from './components/SchedulePage.jsx';
 import SettingsPanel from './components/SettingsPanel.jsx';
+import DemoPage from './components/DemoPage.jsx';
 import { validateConfiguration, getConfigSummary } from './utils/config.js';
 import { ProfilerWrapper, useRenderPerformance } from './utils/performance.jsx';
 
@@ -126,6 +127,7 @@ const App = () => {
               <NavLink to="/preview" className={navLinkClasses}>Preview</NavLink>
               <NavLink to="/schedule" className={navLinkClasses}>Schedule</NavLink>
               <NavLink to="/settings" className={navLinkClasses}>Settings</NavLink>
+              <NavLink to="/demo" className={navLinkClasses}>Demo</NavLink>
             </nav>
 
             <ErrorProvider>
@@ -158,6 +160,7 @@ const App = () => {
                     />}
                   />
                   <Route path="/settings" element={<SettingsPanel />} />
+                  <Route path="/demo" element={<DemoPage />} />
                 </Routes>
               </main>
             </ErrorProvider>
